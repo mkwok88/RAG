@@ -1,0 +1,5 @@
+python3 -m venv venv
+# this ran python 3, ran a modeule as a script rather than executing a file, create virtual environemnt, dir venv
+
+venv\Scripts\Activate.ps1
+# This points our terminal to the virtual environemnt

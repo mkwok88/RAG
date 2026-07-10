@@ -3,6 +3,8 @@
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
 
 # we always have to load the environemnt because we have our OPENAI_API_KEY in the .env
 load_dotenv()
@@ -20,7 +22,7 @@ db = Chroma(
     collection_metadata={"hnsw:space": "cosine"}
 )
 
-query= "What was NVIDIA's first graphics accelerator called?"
+query= "What was Microsoft's firsts hardware product release?"
 
 # retrieve the top 3 most similar chunks to the query from the vector store
 # retriever = db.as_retriever( search_kwargs={"k": 3})
@@ -40,3 +42,24 @@ for i, doc in enumerate(relevant_docs):
     print(f"Document {i+1}:\n{doc.page_content}\n")
 
 
+combined_input = f"""Based on the following documents, please answer this question: {query}
+
+Documents:
+{chr(10).join([f"- {doc.page_content}" for doc in relevant_docs])}
+
+Please provide a clear, helpful answer using only the information from these documents. If you cannot find the answer in the documents, please respond with "There is not enough information provided in the documents.relevant_docs.
+"""
+
+model = ChatOpenAI(model="gpt-4o")
+
+messages = [
+    SystemMessage(content="You are a helpful assistant that answers questions based on the provided documents."),
+    HumanMessage(content=combined_input)
+]
+
+result = model.invoke(messages)
+
+print("\n --- Generated Response ---")
+
+print ("Content only:")
+print(result.content)
